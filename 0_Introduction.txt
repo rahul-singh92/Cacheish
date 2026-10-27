@@ -1,0 +1,18 @@
+Redis is in-memory key-value store, used primarily for caching.
+
+Cache server is a map<string, string> over a network, but in redis the "value" part is not 
+just string, it can be any data structure.
+Ex: ranking, list pagination etc.
+
+Layers of Protocols:
+1. The layer of small, discrete message(IP): It is packet based, and the ability to assemble
+    packets into application data is provided by a higher layer, ususally TCP
+
+2. The layer of multiplexing(Port Number): adds a 16 bit port number to distinguish diff 
+    apps. (src_ip, src_port, dst_ip, dst_port)
+
+3. The layer of reliable & ordered bytes(TCP): Network is unreliable so packet can be dropped, 
+    reordered etc. TCP provides a layer of reliable & ordered bytes on top of IP packets,
+    it handle retransmission, reordereding automatically.
+
+Redis is request-response protocol.
