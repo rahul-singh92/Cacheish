@@ -62,16 +62,16 @@ static void fd_set_nb(int fd)
     }
 }
 
-const size_t k_max_msg = 32 << 20;
-const size_t k_max_args = 200 * 1000;
+const size_t k_max_msg = 32 << 20; // 33,554,432 bytes or 32 MB
+const size_t k_max_args = 200 * 1000; // 200,000 strings in a single command
 
 // Dynamic Buffer
 struct Buffer
 {
-    uint8_t *buffer_begin;
-    uint8_t *buffer_end;
-    uint8_t *data_begin;
-    uint8_t *data_end;
+    uint8_t *buffer_begin;  // start of allocated heap memory block
+    uint8_t *buffer_end;  // end of allocated heap memory block
+    uint8_t *data_begin;  // start of actual unread data
+    uint8_t *data_end;  // end of actual unread data
 };
 
 size_t buf_size(Buffer *buf)
@@ -132,12 +132,12 @@ static void buf_consume(struct Buffer *buf, size_t n)
 
 enum
 {
-    TAG_NIL = 0,
-    TAG_ERR = 1,
-    TAG_STR = 2,
-    TAG_INT = 3,
-    TAG_DBL = 4,
-    TAG_ARR = 5,
+    TAG_NIL = 0, // key not found / empty reply
+    TAG_ERR = 1, // Error
+    TAG_STR = 2, // String reply
+    TAG_INT = 3, // 64-bit integer reply
+    TAG_DBL = 4, // double(float) reply
+    TAG_ARR = 5, // array of items
 };
 
 static bool read_u32(const uint8_t *&cur, const uint8_t *end, uint32_t &out)
@@ -255,6 +255,7 @@ static bool entry_eq(HNode *lhs, HNode *rhs)
     return le -> key == re -> key;
 }
 
+// MurmurHash3 algorithm used
 static inline uint32_t rotl32(uint32_t x, int r)
 {
     return (x << r) | (x >> (32 - r));

@@ -13,7 +13,7 @@ static void h_init(HTab *htab, size_t n)
     htab -> size = 0;
 }
 
-// hashtable insertion
+// hashtable insertion O(1)
 static void h_insert(HTab *htab, HNode *node)
 {
     size_t pos = node -> hcode & htab -> mask;
@@ -50,6 +50,21 @@ static HNode *h_detach(HTab *htab, HNode **from)
     *from = node -> next;     // update the incoming pointer to the target
     htab -> size--;
     return node;
+}
+
+static bool h_foreach(HTab *htab, bool (*f)(HNode *, void *), void *arg)
+{
+    for (size_t i = 0; htab->mask != 0 && i <= htab->mask; i++)
+    {
+        for (HNode *node = htab->tab[i]; node != NULL; node = node->next)
+        {
+            if (!f(node, arg))
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 const size_t k_rehashing_work = 128;    // constant work
@@ -143,21 +158,6 @@ void hm_clear(HMap *hmap)
 size_t hm_size(HMap *hmap)
 {
     return hmap -> newer.size + hmap -> older.size;
-}
-
-static bool h_foreach(HTab *htab, bool (*f)(HNode *, void *), void *arg)
-{
-    for (size_t i = 0; htab->mask != 0 && i <= htab->mask; i++)
-    {
-        for (HNode *node = htab->tab[i]; node != NULL; node = node->next)
-        {
-            if (!f(node, arg))
-            {
-                return false;
-            }
-        }
-    }
-    return true;
 }
 
 void hm_foreach(HMap *hmap, bool (*f)(HNode *, void *), void *arg)
